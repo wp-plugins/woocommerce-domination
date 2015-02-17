@@ -127,21 +127,35 @@ class WC_Domination_Admin {
 		// Fix WooCommerce submenus order.
 		$submenu_items     = array();
 		$woocommerce_order = 2;
+		$wc_23             = version_compare( WC_VERSION, '2.3', '>=' );
 
 		if ( isset( $submenu['woocommerce'] ) ) {
 			foreach ( $submenu['woocommerce'] as $key => $items ) {
-				if ( in_array( 'wc-settings', $items ) ) {
-					$submenu_items[0] = $items;
-				} elseif ( in_array( 'woocommerce', $items ) ) {
-					continue;
+				if ( $wc_23 ) {
+					if ( in_array( 'wc-settings', $items ) ) {
+						$submenu_items[1] = $items;
+					} elseif ( in_array( 'woocommerce', $items ) ) {
+						$submenu_items[0] = $items;
+					} else {
+						$submenu_items[ $woocommerce_order ] = $items;
+					}
 				} else {
-					$submenu_items[ $woocommerce_order ] = $items;
+					if ( in_array( 'wc-settings', $items ) ) {
+						$submenu_items[0] = $items;
+					} elseif ( in_array( 'woocommerce', $items ) ) {
+						continue;
+					} else {
+						$submenu_items[ $woocommerce_order ] = $items;
+					}
 				}
+
 				$woocommerce_order++;
 			}
 		}
 
-		$submenu['woocommerce'] = $submenu_items;
+		// Fix the array order.
+		ksort( $submenu_items );
+		$submenu['woocommerce'] = array_values( $submenu_items );
 
 		// Custom menu items order.
 		$menu_order = array(
